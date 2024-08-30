@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { createHash, randomBytes } from 'node:crypto';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -19,7 +20,7 @@ function hashPassword(password: string): string {
 }
 
 export async function createOrg(data: CreateOrgDTO) {
-  const hashedPassword = hashPassword(data.password);
+  const hashedPassword = await bcrypt.hash(data.password, 10);
 
   const newOrg = await prisma.org.create({
     data: {

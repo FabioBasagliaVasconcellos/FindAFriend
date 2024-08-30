@@ -12,8 +12,10 @@ export async function registerOrg(req: FastifyRequest, reply: FastifyReply) {
 
   try {
     const org = await createOrg({ name, email, password, address, phone });
+    
     return reply.status(201).send(org);
   } catch (error) {
+
     console.error('Error registering org:', error);
     return reply.status(400).send({ error: 'Failed to register organization' });
   }

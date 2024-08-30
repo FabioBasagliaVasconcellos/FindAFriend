@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { createHash } from 'crypto';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 
@@ -13,15 +14,22 @@ export async function loginOrg({ email, password }: LoginOrgDTO) {
     where: { email },
   });
 
+
   if (!org) {
     throw new Error('Invalid credentials');
   }
 
-  const hashedPassword = createHash('sha256').update(password).digest('hex');
+  const isPasswordValid = await bcrypt.compare(password, org.password);
 
-  if (hashedPassword !== org.password) {
+  
+
+  if (!isPasswordValid) {
     throw new Error('Invalid credentials');
   }
 
-  return org; 
+  const token = jwt.sign({ orgId: org.id }, process.env.JWT_SECRET as string, {
+    expiresIn: '1h', 
+  });
+
+  return { org, token };
 }
